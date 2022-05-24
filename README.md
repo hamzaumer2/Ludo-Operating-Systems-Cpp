@@ -1,4 +1,4 @@
-The above project is currently in development and might have some rough edges. Stable version would be uploaded in a few days
+The above project has been completed. Open a Pull request if you find any issues
 
 ***********************************************************************************************************************************
 

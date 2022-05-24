@@ -8,6 +8,7 @@ Ludo Game. Operating Systems Project
  ***********************************************************************************************************************************
  How To Run:
  
+ //
  cd ~/Desktop/OS-Project
  
 g++ ludo.cpp -pthread

@@ -1,4 +1,4 @@
-The above project has been completed. Open a Pull request if you find any issues
+The above project has been completed. Create a Pull request if you find any issues
 
 ***********************************************************************************************************************************
 

@@ -71,4 +71,7 @@ Dice Movement:
 ![image](https://user-images.githubusercontent.com/71342062/169882610-3844aedf-9007-4324-ab6d-e29d757f6a19.png)
 
 
+<iframe src="https://www.linkedin.com/embed/feed/update/urn:li:ugcPost:6934947715021709315" height="780" width="504" frameborder="0" allowfullscreen="" title="Embedded post"></iframe>
+
+
 

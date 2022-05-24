@@ -7,15 +7,12 @@ Ludo Game. Operating Systems Project
  
  ***********************************************************************************************************************************
  How To Run:
- 
-{
- cd ~/Desktop/OS-Project
- 
-g++ ludo.cpp -pthread
- 
- ./a.out
-
-};
+    
+    git clone https://github.com/hamzaumer2/Ludo-Operating-Systems
+    cd~/Downloads/Ludo-Operating-Systems-main
+    g++ ludo.cpp -pthread
+    ./a.out
+    
  ************************************************************************************************************************************
  
  
@@ -28,31 +25,30 @@ The parent thread will create the worker threads, passing each worker the locati
 A struct is made to create a data structure for each thread, which includes row and column where a thread must begin validating
 
 
+    struct token {
 
-struct token {
-
-    int value, x, y;
-    bool open, home, stop, win;
-    char sym;
-    token() {//CONSTRUCTORS
-        value = -1;
-        x = 0;
-        y = 0;
-        stop = 0;
-        win = 0;
-        open = 0;
-        sym = '!';
-    }
-    token(int v, int x1, int y1, bool o, bool s, bool w, char sy) {
-        value = v;
-        x = x1;
-        y = y1;
-        stop = s;
-        win = w;
-        open = o;
-        sym = sy;
-    }
-};
+        int value, x, y;
+        bool open, home, stop, win;
+        char sym;
+        token() {//CONSTRUCTORS
+            value = -1;
+            x = 0;
+            y = 0;
+            stop = 0;
+            win = 0;
+            open = 0;
+            sym = '!';
+        }
+        token(int v, int x1, int y1, bool o, bool s, bool w, char sy) {
+            value = v;
+            x = x1;
+            y = y1;
+            stop = s;
+            win = w;
+            open = o;
+            sym = sy;
+        }
+    };
 
 
 A player thread is made, which has the data for hits, turns with sixes, and scoreboard level
@@ -71,5 +67,3 @@ ________________________________________________________________________________
 Dice Movement:
 
 ![image](https://user-images.githubusercontent.com/71342062/169882610-3844aedf-9007-4324-ab6d-e29d757f6a19.png)
-
-

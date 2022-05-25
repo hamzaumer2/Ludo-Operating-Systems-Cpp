@@ -9,7 +9,7 @@ Ludo Game. Operating Systems Project
  How To Run:
     
     git clone https://github.com/hamzaumer2/Ludo-Operating-Systems
-    cd~/Downloads/Ludo-Operating-Systems-main
+    cd ~/Downloads/Ludo-Operating-Systems-main
     g++ ludo.cpp -pthread
     ./a.out
     

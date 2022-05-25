@@ -14,21 +14,30 @@
 
 using namespace std;
 
+//SHARED VARIABLES
+sem_t sem, sem1, sem2;
+
+
+//
+pthread_t tid1, tid2;
+
+
+
 int rolling_dice() {
     srand(time(NULL));
     return rand() % 6 + 1;
 }
 
 
-int tokens = 4;
+int play_pieces = 4;
 
-struct token {
+struct play_piece {
     
     int value, x, y;
     bool open, home, stop, win;
     char sym;
 
-    token() {
+    play_piece() {
         value = -1;
         x = 0, y = 0;
         stop = 0;
@@ -37,7 +46,7 @@ struct token {
         sym = '!';
     }
 
-    token(int v, int x1, int y1, bool o, bool s, bool w, char sy) {
+    play_piece(int v, int x1, int y1, bool o, bool s, bool w, char sy) {
         value = v;
         x = x1;
 	    y = y1;
@@ -49,12 +58,12 @@ struct token {
 
 };
 
-//each player has 1-4 tokens
+//each player has 1-4 play_pieces
 
 
 struct player {
 
-    token *tok;
+    play_piece *tok;
     int hitRate, withoutsixturns;
     bool is_win, inGame;
 
@@ -66,10 +75,10 @@ struct player {
         withoutsixturns = 0;
     }
 
-    player(char symbol, int noOftokens) {
+    player(char symbol, int noOfplay_pieces) {
 
-        tok = new token[noOftokens];
-        for (int i = 0; i < noOftokens; i++) {
+        tok = new play_piece[noOfplay_pieces];
+        for (int i = 0; i < noOfplay_pieces; i++) {
             tok[i].sym = symbol;
         }
 
@@ -80,23 +89,26 @@ struct player {
     }
 }; player p1, p2, p3, p4;
 
-sem_t sem, sem1, sem2;
-pthread_t gtid2, tid3;
-
 
 void *MasterThread(void *attr);
 
-void path1(int distance, token *t);
+void* playerthread(void* attr);
+
+void *killPlayer(void *attr);
+
+
+//////////////////////////////////////////////////////
+void movement_path(int distance, play_piece* t);
+
+
+
+//-------------------------------------
+//INTERFACED WORK
 
 void draw_frame();
 
 void gridder(int, int);
-
-void *killPlayer(void *attr);
-
-void *playerthread(void *attr);
-
-int rolling_dice();
+//-------------------------------------
 
 
 int main(void) {
@@ -107,12 +119,12 @@ int main(void) {
 
 
     do {
-        cout << "\nEnter the number of tokens for each player between 1 to 4 :";
-        cin >> tokens;
-    } while (tokens < 1 || tokens > 4);
+        cout << "\nEnter the number of play_pieces for each player between 1 to 4 :";
+        cin >> play_pieces;
+    } while (play_pieces < 1 || play_pieces > 4);
 
     //creating four players
-    player temp('&', tokens), temp1('%', tokens), temp2('#', tokens), temp3('@', tokens);
+    player temp('&', play_pieces), temp1('%', play_pieces), temp2('#', play_pieces), temp3('@', play_pieces);
 
     p1 = temp;
     p2 = temp1;
@@ -171,7 +183,7 @@ void *MasterThread(void *attr) {
     }
 
     sem_wait(&sem2);//LOCKING SEMAPHORE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    for (int i = 0; i < tokens; i++) {
+    for (int i = 0; i < play_pieces; i++) {
         //checing home path condition and hit rate
         if (tempPlayer->hitRate > 0 && tempPlayer->tok[i].value >= 50) {
             tempPlayer->tok[i].home = 1;
@@ -185,7 +197,7 @@ void *MasterThread(void *attr) {
         tempPlayer->inGame = 0;
     }
     bool notwinflag = 0;
-    for (int i = 0; i < tokens; i++) {
+    for (int i = 0; i < play_pieces; i++) {
         if (!tempPlayer->tok[i].win) {
             notwinflag = 1;
         }
@@ -204,12 +216,12 @@ void *MasterThread(void *attr) {
 
 
 ///
-// function for the motion of the tokens
+// function for the motion of the play_pieces
 ///
-void path1(int distance, token *t) {
+void movement_path(int distance, play_piece *t) {
     int attr;
 
-    //checking players tokens
+    //checking players play_pieces
 
     switch (t->sym) {
     case '&': {
@@ -232,11 +244,12 @@ void path1(int distance, token *t) {
     for (int i = 0; i < distance; i++) {
         sem_init(&sem2, 0, 1);
         //ceating master thread
-        pthread_create(&tid3, NULL, &MasterThread, &attr);
-        pthread_join(tid3, NULL);
+        pthread_create(&tid2, NULL, &MasterThread, &attr);
+        pthread_join(tid2, NULL);
         t->value++;
-        //checking if not home and then assingning respective positions to tokens
+        //checking if not home and then assingning respective positions to play_pieces
         if (!t->home) {
+
             if (t->y > 9 && t->x == 6) {
                 t->y--;
             } else if (t->y == 9 && t->x == 6) {
@@ -277,7 +290,9 @@ void path1(int distance, token *t) {
             if (t->value > 51) {
                 t->value = (t->value % 52);
             }
-        } else {
+        } 
+        
+        else {
             switch (t->sym) {
             case '&': {
                 t->x++;
@@ -305,12 +320,8 @@ void path1(int distance, token *t) {
 }
 
 ///
-// draw the whole game scenarion or grid as well as tokens
+// draw the whole game scenarion or grid as well as play_pieces
 ///
-
-
-
-
 
 
 int x[4][3];
@@ -339,9 +350,9 @@ void *killPlayer(void *attr) {
 
     if (tempPlayer->inGame && !tempPlayer->is_win) {
         sem_wait(&sem1);//LOCKING SEMAPHORE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        for (int i = 0; i < tokens; i++) {
+        for (int i = 0; i < play_pieces; i++) {
             if (tempPlayer->tok[i].sym == '&') {
-                for (int j = 0; j < tokens; j++) {
+                for (int j = 0; j < play_pieces; j++) {
                     if (tempPlayer->tok[i].x == p3.tok[j].x && 
                         tempPlayer->tok[i].y == p3.tok[j].y && 
                         p3.tok[j].open == 1 && p3.tok[j].stop != 1) {
@@ -380,7 +391,7 @@ void *killPlayer(void *attr) {
                     }
                 }
             } else if (tempPlayer->tok[i].sym == '%') {
-                for (int j = 0; j < tokens; j++) {
+                for (int j = 0; j < play_pieces; j++) {
                     if (tempPlayer->tok[i].x == p1.tok[j].x && 
                         tempPlayer->tok[i].y == p1.tok[j].y &&
                         p1.tok[j].open == 1 && p1.tok[j].stop != 1) {
@@ -419,7 +430,7 @@ void *killPlayer(void *attr) {
                     }
                 }
             } else if (tempPlayer->tok[i].sym == '#') {
-                for (int j = 0; j < tokens; j++) {
+                for (int j = 0; j < play_pieces; j++) {
                     if (tempPlayer->tok[i].x == p4.tok[j].x && 
                         tempPlayer->tok[i].y == p4.tok[j].y &&
                         p4.tok[j].open == 1 && p4.tok[j].stop != 1) {
@@ -458,7 +469,7 @@ void *killPlayer(void *attr) {
                     }
                 }
             } else if (tempPlayer->tok[i].sym == '@') {
-                for (int j = 0; j < tokens; j++) {
+                for (int j = 0; j < play_pieces; j++) {
                     if (tempPlayer->tok[i].x == p2.tok[j].x && 
                         tempPlayer->tok[i].y == p2.tok[j].y &&
                         p2.tok[j].open == 1 && p2.tok[j].stop != 1) {
@@ -576,21 +587,21 @@ void *playerthread(void *attr) {
     for (int j = 0; j < 3 && x[temp - 1][j] > 0; j++) {
         int n = 1;
         bool flag = false;
-        for (int i = 0; i < tokens; i++) {
+        for (int i = 0; i < play_pieces; i++) {
             if (tempPlayer->tok[i].open == 1) {
                 flag = true;
             }
         }
         if (flag || x[temp - 1][j] == 6) {
-            cout << "\nEnter which token you want to move for player: " << temp << " :";
+            cout << "\nEnter which play_piece you want to move for player: " << temp << " :";
             cin >> n;
 
-            while (n > tokens || n < 1) {
-                cout << "Enter value from 1 to " << tokens << ": ";
+            while (n > play_pieces || n < 1) {
+                cout << "Enter value from 1 to " << play_pieces << ": ";
                 cin >> n;
             }
             while (((!tempPlayer->tok[n - 1].open) && x[temp - 1][j] != 6) || (tempPlayer->tok[n - 1].win)) {
-                cout << "Please Enter value of opened tokens: ";
+                cout << "Please Enter value of opened play_pieces: ";
                 cin >> n;
             }
             bool winflag = 0;
@@ -598,7 +609,7 @@ void *playerthread(void *attr) {
             while (tempPlayer->tok[n - 1].value + x[temp - 1][j] > 56) {
                 cout << "Illegal Move!!!..." << endl;
 
-                for (int k = 0; k < tokens; k++) {
+                for (int k = 0; k < play_pieces; k++) {
                     if (k != n - 1) {
                         if (!tempPlayer->tok[k].win && tempPlayer->tok[k].open) {
                             winflag = 1;
@@ -609,7 +620,7 @@ void *playerthread(void *attr) {
                     }
                 }
                 if (winflag) {
-                    cout << "Enter Another Token: " << endl;
+                    cout << "Enter Another play_piece: " << endl;
                     cin >> n;
                 } else {
                     notmoveflag = 1;
@@ -619,7 +630,7 @@ void *playerthread(void *attr) {
 
 
             if (tempPlayer->tok[n - 1].open && !notmoveflag) {
-                path1(x[temp - 1][j], &tempPlayer->tok[n - 1]);
+                movement_path(x[temp - 1][j], &tempPlayer->tok[n - 1]);
             } else if (x[temp - 1][j] == 6) {
 
                 tempPlayer->tok[n - 1].value = 0;
@@ -666,18 +677,18 @@ void *playerthread(void *attr) {
             }
         }
 
-        for (int i = 0; i < tokens; i++)
+        for (int i = 0; i < play_pieces; i++)
             if ((tempPlayer->tok[i].value) == -1) {
-                cout << "\nToken: " << i + 1 << " of player: " << temp << " is in HOME" << endl;
+                cout << "\nplay_piece: " << i + 1 << " of player: " << temp << " is in HOME" << endl;
             }
             else {
-                cout << "\nToken: " << i + 1 << " of player: " << temp << " is at position: " << (tempPlayer->tok[i].value) << endl;
+                cout << "\nplay_piece: " << i + 1 << " of player: " << temp << " is at position: " << (tempPlayer->tok[i].value) << endl;
             }
         cout << endl;
         cout << endl;
         sem_init(&sem1, 0, 1);
-        pthread_create(&gtid2, NULL, &killPlayer, &temp);
-        pthread_join(gtid2, NULL);
+        pthread_create(&tid1, NULL, &killPlayer, &temp);
+        pthread_join(tid1, NULL);
 
         
         draw_frame();
@@ -697,10 +708,10 @@ void draw_frame() {
         for (int j = 0; j < 15; j++) {
 
 
-            switch (tokens) {
+            switch (play_pieces) {
 
 
-            case 1:// grid for 1 token+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++==
+            case 1:// grid for 1 play_piece+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++==
             {
                 if (i == 4 && j == 1 && !p1.tok[0].open)
                     cout << "  &  ";
@@ -739,7 +750,7 @@ void draw_frame() {
 
 
 
-            case 2://grid for 2 tokens++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            case 2://grid for 2 play_pieces++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             {
                 if (i == 4 && j == 1 && !p1.tok[0].open)
                     cout << "  &  ";
@@ -791,7 +802,7 @@ void draw_frame() {
 
 
 
-            case 3://grid for 3 tokens+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            case 3://grid for 3 play_pieces+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             {
                 if (i == 4 && j == 1 && !p1.tok[0].open)
                     cout << "  &  ";
@@ -859,7 +870,7 @@ void draw_frame() {
             }
 
 
-            //4 TOKENS +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            //4 play_pieceS +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             case 4: {
                 if (i == 4 && j == 1 && !p1.tok[0].open)
                     cout << "  &  ";

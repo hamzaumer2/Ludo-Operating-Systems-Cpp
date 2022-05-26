@@ -5,7 +5,7 @@ The above project has been completed. Let me know if you find any issues
 # Ludo Game using Operating Systems Concepts. Semester Project
 __________________________________________________________________________________________________________________________________
 
-  How To Run:
+  How To Compile:
     
     git clone https://github.com/hamzaumer2/Ludo-Operating-Systems
     cd ~/Downloads/Ludo-Operating-Systems-main

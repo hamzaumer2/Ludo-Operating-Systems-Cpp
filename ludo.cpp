@@ -1,4 +1,5 @@
 //200789 Hamza Umer Farooq
+//201947 Muhammad Sarib Hanif
 //BSCS - 4 - B
 //OS SEMESTER PROJECT
 
@@ -114,6 +115,7 @@ void gridder(int, int);
 int main(void) {
     cout << "\n\nOS LAB PROJECT";
     cout << "\n200789 - HAMZA UMER FAROOQ";
+    cout << "\n201947 - SARIB HANIF";
     cout << "\nBSCS - 4 - B";
 
 

@@ -17,8 +17,8 @@ ________________________________________________________________________________
 ************************************************************************************************************************************
 ## Contributions:
 * 1. Hamza Umer - 200789 (Me)
-* Haroon Abdullah - 201893
-* Sarib Hanif - 201947
+* 2. Haroon Abdullah - 201893
+* 3. Sarib Hanif - 201947
 
  
  Ludo is a traditional game consisting of 2-4 Players competing agaisnt each other for who takes all their tokens to home first

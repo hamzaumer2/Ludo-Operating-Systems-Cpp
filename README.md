@@ -20,6 +20,14 @@ ________________________________________________________________________________
 * Haroon Abdullah - 201893
 * Sarib Hanif - 201947
 
+### Semester: 4th
+
+### Subject: Operating Systems
+
+### University: Air University, Islamabad
+
+### Submitted files to: Sir Raja Zia
+
 ***************************************************************************************************************************************
  
  Ludo is a traditional game consisting of 2-4 Players competing agaisnt each other for who takes all their tokens to home first

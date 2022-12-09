@@ -27,8 +27,7 @@ ________________________________________________________________________________
 
 ## Contributions:
 * Hamza Umer - 200789 (Me)
-* Haroon Abdullah - 201893
-* Sarib Hanif - 201947
+* Muhammad Bilal Raza (Bahria University)
 
 
 
